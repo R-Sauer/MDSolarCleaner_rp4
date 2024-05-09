@@ -1,51 +1,61 @@
+# Autor: Erik Vinueza Orbea
+# 09.05.2024
+
+import time
+
 try:
  import RPi.GPIO as GPIO
 except ImportError:
  import SimulRPi.GPIO as GPIO
 #import RPi.GPIO as GPIO
+
+#Class Motor definieren
+class Motor:
+    def __init__(self, motorStepPin, motorDirPin):
+        self.motorStepPin = motorStepPin        #Pin Nummer des Motors für die Steps ausgaben
+        self.motorDirPin = motorDirPin          #Pin Nummer des Motors für die Richtung 0 => dir_pin=low  1 => dir_pin=high
+        self.pulseDelay = 100                   #Delay zwischen Pulse in ms
+        self.pulseWidth = 50                    #Dauer des Pulses in ms
+
+        # Initialisierung der GPIO-Pins
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(motorStepPin, GPIO.OUT)
+        GPIO.setup(motorDirPin, GPIO.OUT)
+          
+    def makeSteps(self, stepsNr, dir):
+       #Setze Richtung
+       GPIO.output(self.motorDirPin, dir)
+       #Bewegung des Motors in die angegebene Schritte
+       for _ in range (stepsNr):
+          GPIO.output(self.motorStepPin, GPIO.HIGH)
+          time.sleep(self.pulseWidth/1000)           #Die Funktion hat Sekunde als input
+          GPIO.output(self.motorStepPin, GPIO.LOW)
+          time.sleep(self.pulseWidth/1000)
+    
+
 # GPIO-Pins für die Motorsteuerung
-motor_pwm_pin_1 = 18 # PWM-Pin für Motor 1 Geschwindigkeitssteuerung
-motor_dir_pin_1_1 = 23 # Richtungspin 1 für Motor 1
-motor_dir_pin_2_1 = 24 # Richtungspin 2 für Motor 1
-motor_pwm_pin_2 = 25 # PWM-Pin für Motor 2 Geschwindigkeitssteuerung
-motor_dir_pin_1_2 = 8 # Richtungspin 1 für Motor 2
-motor_dir_pin_2_2 = 7 # Richtungspin 2 für Motor 2
-# Initialisierung der GPIO-Pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(motor_pwm_pin_1, GPIO.OUT)
-GPIO.setup(motor_dir_pin_1_1, GPIO.OUT)
-GPIO.setup(motor_dir_pin_2_1, GPIO.OUT)
-GPIO.setup(motor_pwm_pin_2, GPIO.OUT)
-GPIO.setup(motor_dir_pin_1_2, GPIO.OUT)
-GPIO.setup(motor_dir_pin_2_2, GPIO.OUT)
-# PWM-Objekte für die Geschwindigkeitssteuerung der beiden Motoren
-pwm_motor_1 = GPIO.PWM(motor_pwm_pin_1, 100) # 100 Hz PWM
-pwm_motor_2 = GPIO.PWM(motor_pwm_pin_2, 100) # 100 Hz PWM
-# Funktion zur Steuerung der Geschwindigkeit und Richtung beider Motoren
-def motor_control(speed_1, direction_1, speed_2, direction_2):
- # Geschwindigkeitseinstellungen
- pwm_motor_1.start(speed_1)
- pwm_motor_2.start(speed_2)
- # Richtungseinstellungen
- GPIO.output(motor_dir_pin_1_1, direction_1)
- GPIO.output(motor_dir_pin_2_1, not direction_1)
- GPIO.output(motor_dir_pin_1_2, direction_2)
- GPIO.output(motor_dir_pin_2_2, not direction_2)
+motorY_step_pin = 18 # Step-Pin für Motor 1
+motorY_dir_pin = 23 # Richtungspin für Motor 1
+motorX_step_pin = 25 # Step-Pin für Motor 2
+motorX_dir_pin = 8 # Richtungspin für Motor 2
+
+#Implemetierung der Motor Klasse
+
+motorY = Motor(motorY_step_pin,motorY_dir_pin)
+motorX = Motor(motorX_step_pin,motorX_dir_pin)
+
 # Beispielanwendung
-try:
- while True:
- speed_1 = float(input("Geben Sie die Geschwindigkeit für Motor 1 ein (0-100): "))
- direction_1 = int(input("Geben Sie die Richtung für Motor 1 ein (0 für vorwärts, 1 für 
-rückwärts): "))
- speed_2 = float(input("Geben Sie die Geschwindigkeit für Motor 2 ein (0-100): "))
- direction_2 = int(input("Geben Sie die Richtung für Motor 2 ein (0 für vorwärts, 1 für 
-rückwärts): "))
- # Geschwindigkeit und Richtung der beiden Motoren steuern
- motor_control(speed_1, direction_1, speed_2, direction_2)
-except KeyboardInterrupt:
- pass
-finally:
- # Programm beenden und GPIO-Pins freigeben
- pwm_motor_1.stop()
- pwm_motor_2.stop()
- GPIO.cleanup()
+
+while True:
+    #Eingabe der Richtung vom Motor
+    direction_Y = int(input("Geben Sie die Richtung für Y-Motor ein (0 für vorwärts, 1 für rückwärts): "))
+    #direction_X = int(input("Geben Sie die Richtung für X-Motor ein (0 für vorwärts, 1 für rückwärts): ")
+    
+    #Eingabe Anzahl von Schritte
+    stepsMotorY = int(input("Geben Sie die Schritte für Y-Motor 1 ein : "))   
+    #stepsMotorX = int(input("Geben Sie die Schritte für X-Motor ein : "))
+    
+    #Bewegung der Motoren
+    motorY.makeSteps(stepsMotorY,direction_Y)           #Hier blockiert wir der Code Blockeirt
+    #motorX.makeSteps(stepsMotorX,direction_X)          #eine Lösung wäre eine bib wie accelStepper wie bei Arduino zu finden
+      
