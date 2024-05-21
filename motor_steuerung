@@ -10,12 +10,11 @@ except ImportError:
 #import RPi.GPIO as GPIO
 
 #Class Motor definieren
-class Motor:
+class StepMotor:
     def __init__(self, motorStepPin, motorDirPin):
         self.motorStepPin = motorStepPin        #Pin Nummer des Motors für die Steps ausgaben
         self.motorDirPin = motorDirPin          #Pin Nummer des Motors für die Richtung 0 => dir_pin=low  1 => dir_pin=high
-        self.pulseDelay = 100                   #Delay zwischen Pulse in ms
-        self.pulseWidth = 50                    #Dauer des Pulses in ms
+        self.stepPeriod = 2500                  #Dauer eines Schrittes in us
 
         # Initialisierung der GPIO-Pins
         GPIO.setmode(GPIO.BCM)
@@ -28,34 +27,39 @@ class Motor:
        #Bewegung des Motors in die angegebene Schritte
        for _ in range (stepsNr):
           GPIO.output(self.motorStepPin, GPIO.HIGH)
-          time.sleep(self.pulseWidth/1000)           #Die Funktion hat Sekunde als input
+          time.sleep(self.stepPeriod/2000000)           #Die Funktion hat Sekunde als input
           GPIO.output(self.motorStepPin, GPIO.LOW)
-          time.sleep(self.pulseWidth/1000)
+          time.sleep(self.stepPeriod/2000000)            #Es gibt zwei Delays und deswegen nur halbe Periode
     
-
-# GPIO-Pins für die Motorsteuerung
-motorY_step_pin = 18 # Step-Pin für Motor 1
-motorY_dir_pin = 23 # Richtungspin für Motor 1
-motorX_step_pin = 25 # Step-Pin für Motor 2
-motorX_dir_pin = 8 # Richtungspin für Motor 2
-
-#Implemetierung der Motor Klasse
-
-motorY = Motor(motorY_step_pin,motorY_dir_pin)
-motorX = Motor(motorX_step_pin,motorX_dir_pin)
-
-# Beispielanwendung
-
-while True:
-    #Eingabe der Richtung vom Motor
-    direction_Y = int(input("Geben Sie die Richtung für Y-Motor ein (0 für vorwärts, 1 für rückwärts): "))
-    #direction_X = int(input("Geben Sie die Richtung für X-Motor ein (0 für vorwärts, 1 für rückwärts): ")
+    def setFrequencyInHz(self, frequency):
+       self.stepPeriod = (10^4)/(4*frequency)            #Frequenz in Hz und Period in us
     
-    #Eingabe Anzahl von Schritte
-    stepsMotorY = int(input("Geben Sie die Schritte für Y-Motor 1 ein : "))   
-    #stepsMotorX = int(input("Geben Sie die Schritte für X-Motor ein : "))
+    def setSpeedInMPS(self, velocity):
+       self.stepPeriod = (10^4)/(28*velocity)           #velocity in m/s und Peruid in us
     
-    #Bewegung der Motoren
-    motorY.makeSteps(stepsMotorY,direction_Y)           #Hier blockiert wir der Code Blockeirt
-    #motorX.makeSteps(stepsMotorX,direction_X)          #eine Lösung wäre eine bib wie accelStepper wie bei Arduino zu finden
-      
+class BrushMotor:
+    def __init__(self, pwm_pin, dir_pin_1):
+        self.pwm_pin = pwm_pin
+        self.dir_pin_1 = dir_pin_1
+        self.speed = 0
+        
+        # Initialisierung der GPIO-Pins
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.pwm_pin, GPIO.OUT)
+        GPIO.setup(self.dir_pin_1, GPIO.OUT)
+        
+        # PWM-Objekt für die Geschwindigkeitssteuerung
+        self.pwm = GPIO.PWM(self.pwm_pin, 100)  # 100 Hz PWM
+        self.pwm.start(0)  # Start PWM with 0% duty cycle
+
+    def setSpeedPercent(self, value):
+        # Setze Geschwindigkeit
+        self.speed = value
+    
+    def move(self, direction):
+        # Setze Richtung
+        GPIO.output(self.dir_pin_1, direction)
+        self.pwm.ChangeDutyCycle(self.speed)
+        
+    def stop(self):
+      self.pwm.ChangeDutyCycle(0)
