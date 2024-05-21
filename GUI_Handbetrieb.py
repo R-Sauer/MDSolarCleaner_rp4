@@ -6,82 +6,7 @@ from tkinter import messagebox
 from tkinter import PhotoImage, ttk
 #from ttkthemes import themed_tk as tkt # ttkthemes
 
-try:
- import RPi.GPIO as GPIO
-except ImportError:
- import SimulRPi.GPIO as GPIO
-#import RPi.GPIO as GPIO
-
-
-# Function to toggle power of step motor
-def toggle_step_motor():
-    if step_motor.is_active:
-        step_motor.stop()
-    else:
-        step_motor.forward()
-
-# Function for emergency stop
-def emergency_stop():
-    brush_motor.stop()
-    step_motor.stop()
-
-#Class Motor definieren
-class Motor:
-    def __init__(self, motorStepPin, motorDirPin):
-        self.motorStepPin = motorStepPin        #Pin Nummer des Motors für die Steps ausgaben
-        self.motorDirPin = motorDirPin          #Pin Nummer des Motors für die Richtung 0 => dir_pin=low  1 => dir_pin=high
-        self.pulseDelay = 1.25                  #Delay zwischen Pulse in ms
-        self.pulseWidth = 1.25                  #Dauer des Pulses in ms
-
-        # Initialisierung der GPIO-Pins
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(motorStepPin, GPIO.OUT)
-        GPIO.setup(motorDirPin, GPIO.OUT)
-                  
-    def makeSteps(self, stepsNr, dir):
-        
-       #Setze Richtung
-       GPIO.output(self.motorDirPin, dir)
-       #Bewegung des Motors in die angegebene Schritte
-       for _ in range (stepsNr):
-          GPIO.output(self.motorStepPin, GPIO.HIGH)
-          time.sleep(self.pulseWidth/1000)           #Die Funktion hat Sekunde als input
-          GPIO.output(self.motorStepPin, GPIO.LOW)
-          time.sleep(self.pulseWidth/1000)
-    
-class BrushMotor:
-    def __init__(self, pwm_pin, dir_pin_1, dir_pin_2):
-        self.pwm_pin = pwm_pin
-        self.dir_pin_1 = dir_pin_1
-        self.dir_pin_2 = dir_pin_2
-
-        # Initialisierung der GPIO-Pins
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.pwm_pin, GPIO.OUT)
-        GPIO.setup(self.dir_pin_1, GPIO.OUT)
-        GPIO.setup(self.dir_pin_2, GPIO.OUT)
-
-        # PWM-Objekt für die Geschwindigkeitssteuerung
-        self.pwm = GPIO.PWM(self.pwm_pin, 100)  # 100 Hz PWM
-        self.pwm.start(0)  # Start PWM with 0% duty cycle
-
-    def control(self, speed, direction):
-        # Setze Geschwindigkeit
-        self.pwm.ChangeDutyCycle(speed)
-
-        # Setze Richtung
-        GPIO.output(self.dir_pin_1, direction)
-        GPIO.output(self.dir_pin_2, not direction)
-        
-        
-    def stop(self):
-      self.pwm.ChangeDutyCycle(0) 
-                
-     
-	
-        
-
-   
+import motor_steuerung
 
 # GPIO-Pins für die SchrittMotorsteuerung
 motorY_step_pin = 17 # Step-Pin für Motor Y/1
@@ -90,22 +15,35 @@ motorX_step_pin = 25 # Step-Pin für Motor X/2
 motorX_dir_pin = 8 # Richtungspin für Motor X/2
 
 #Implemetierung der SchrittMotor Klasse
-motorY = Motor(motorY_step_pin,motorY_dir_pin)
-motorX = Motor(motorX_step_pin,motorX_dir_pin)
-
+motorY = motor_steuerung.StepMotor(motorY_step_pin,motorY_dir_pin)
+motorX = motor_steuerung.StepMotor(motorX_step_pin,motorX_dir_pin)
 
 # GPIO-Pins für die Bürstenmotorsteuerung
 motor_pwm_pin_1 = 18  # PWM-Pin für Motor 1 Geschwindigkeitssteuerung
 motor_dir_pin_1_1 = 23  # Richtungspin 1 für Motor 1
-motor_dir_pin_2_1 = 24  # Richtungspin 2 für Motor 1
 
 motor_pwm_pin_2 = 26  # PWM-Pin für Motor 2 Geschwindigkeitssteuerung
 motor_dir_pin_1_2 = 8   # Richtungspin 1 für Motor 2
-motor_dir_pin_2_2 = 7   # Richtungspin 2 für Motor 2
 
-# Bürstenmotoren initialisieren
-brush_motor_1 = BrushMotor(motor_pwm_pin_1, motor_dir_pin_1_1, motor_dir_pin_2_1)
-brush_motor_2 = BrushMotor(motor_pwm_pin_2, motor_dir_pin_1_2, motor_dir_pin_2_2)
+# Bürstenmotoren Implementierung
+brush_motor_1 = motor_steuerung.BrushMotor(motor_pwm_pin_1, motor_dir_pin_1_1, motor_dir_pin_2_1)
+brush_motor_2 = motor_steuerung.BrushMotor(motor_pwm_pin_2, motor_dir_pin_1_2, motor_dir_pin_2_2)
+
+
+# Function for emergency stop
+def emergency_stop():
+    brush_motor.stop()
+    step_motor.stop()
+
+    
+# Function to toggle power of step motor
+def toggle_step_motor():
+    if step_motor.is_active:
+        step_motor.stop()
+    else:
+        step_motor.forward()
+
+
 
 
 # Function to move step motor continuosus up
