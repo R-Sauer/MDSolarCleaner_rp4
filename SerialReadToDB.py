@@ -13,7 +13,6 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
         firstLine = True
 
         while(True):
-            # try:
                 if ser.in_waiting:
                     if firstLine:
                         ser.reset_input_buffer()
@@ -22,8 +21,6 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
                     dataStrList = ser.readline().decode().rstrip().split(";")
                     dataFloatList = [float(val) for val in dataStrList]
                     db.writeSensorTableRow(dataFloatList)
-            # except:
-            #      pass
     finally:
         db.closeConnection()
         ser.close()
