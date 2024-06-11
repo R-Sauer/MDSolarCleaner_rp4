@@ -2,9 +2,10 @@ import sqlite3 #Standardmaessig in Python integriert (kein extra install benöti
 
 #Uebersicht ueber alle Funktionalitaeten, welche in dem Projekt in den einzelnen Dateien genutzt werden
 class Cloud:
-    def __init__(self):   
-        self.conn = sqlite3.connect('/home/solartest/Documents/Solartest_Hauptordner/cloud.db') #Verbindung zu der Cloud, es wird eine cloud.db Datei erstellt wenn noch keine vorhanden ist.
+    def __init__(self, path):   
+        self.conn = sqlite3.connect(path) #Verbindung zu der Cloud, es wird eine cloud.db Datei erstellt wenn noch keine vorhanden ist.
         self.c = self.conn.cursor()
+        self.c.execute('PRAGMA journal_mode=WAL')
 
     def create_topic(self, table): #Erstellt eine Topic auf der Cloud in die Daten geschrieben und ausgelesen werden koennen. Uebergeben wird der Name der zu erstellenden Topic.
         self.c.execute(f"CREATE TABLE IF NOT EXISTS {table}\n(id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)")
@@ -21,13 +22,17 @@ class Cloud:
     def send_to_topic(self, topic, message): #Sendet die uebergebene message an die uebergebene Topic
         self.c.execute(f"INSERT INTO {topic} (message) VALUES (?)", (message,))
         self.conn.commit()
-        self.conn.close()
+        # self.conn.close()
 
     def read_from_cloud(self, table): #Liest die Daten aus, die auf der Topic liegen und returned sie.
         self.c.execute(f"SELECT * FROM {table}")
         messages = self.c.fetchall()
         #print(f"{messages}")
         return messages
+    
+    def readLastEntry(self, table):
+        self.c.execute(f"SELECT * FROM {table} ORDER BY id DESC LIMIT 1;")
+        return self.c.fetchall()
 
     def read_data(self, table): #Ausbau der read_from_cloud: Hier wird der jeweils letzte Eintrag von der Topic in das Terminal geprinted.
         data = self.read_from_cloud(table)
@@ -76,7 +81,7 @@ class Empfaenger:
 
 
 #Beispielbefehle:
-cloud = Cloud()
+# cloud = Cloud()
 """
 cloud.create_topic("arduino")
 cloud.create_topic("nothalt")
