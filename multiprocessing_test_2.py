@@ -10,12 +10,13 @@ SENSOR_FIELDS = ["brush1_rpm", "brush2_rpm", "current_mA"]
 def printLatestEntry(databasePath):
     try:
         db = solarCleanerDB.Database(databasePath)
-        lastentry = ""
+        db.initSensorTable()
+        lastEntry = ""
         while(True):
-            currententry = db.getLastTableRow('sensordata')
-            if currententry != lastentry:
-                print(lastentry)
-            lastentry = currententry
+            currentEntry = db.getLastTableRow('sensordata')
+            if currentEntry != lastEntry:
+                print(lastEntry)
+            lastEntry = currentEntry
     finally:
         db.closeConnection()
 
