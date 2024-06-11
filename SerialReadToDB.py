@@ -11,7 +11,6 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
         db.initSensorTable()
 
         firstLine = True
-
         while(True):
                 if ser.in_waiting:
                     if firstLine:
