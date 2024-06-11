@@ -2,10 +2,12 @@ import sqlite3
 import os
 
 class Database:
-    def __init__(self, _databasePath: str, _sensorTableColumns: list=[], _guiTableColumns: list=[]) -> None:
-        self.sensorTableColumns = _sensorTableColumns
-        self.guiTableColumns = _guiTableColumns
-        self.databasePath = _databasePath
+    def __init__(self, databasePath: str, sensorTableColumns: list=[], guiTableColumns: list=[], motorControlTableColumns: list=[]) -> None:
+        self.databasePath = databasePath
+        # The desired columns of the Database are given as arguments and stored in class members
+        self.sensorTableColumns = sensorTableColumns
+        self.guiTableColumns = guiTableColumns
+        self.motorControlTableColumns = motorControlTableColumns
 
         self.conn = sqlite3.connect(self.databasePath)
         self.c = self.conn.cursor()
@@ -16,7 +18,7 @@ class Database:
         self.c.execute(f"""
                        CREATE TABLE IF NOT EXISTS {tablename} 
                        (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       time DEFAULT (STRFTIME('%H:%M:%f', 'NOW', 'localtime')),
                        {columnsString}
                        )
                        """)
@@ -29,6 +31,18 @@ class Database:
 
     def initGuiTable(self):
         self.initTable("GUI", self.guiTableColumns)
+
+    def initMotorControlTable(self):
+        self.initTable("motorcontrol", self.motorControlTableColumns)
+
+    def getSensorTable(self):
+        return self.getTable("sensordata")
+    
+    def getGUITable(self):
+        return self.getTable("GUI")
+
+    def getMotorControlTable(self):
+        return self.getTable("motorcontrol")
     
     def deleteTable(self, table: str):
         self.c.execute(f"""
@@ -42,7 +56,7 @@ class Database:
         return self.c.fetchall()
 
     def getLastTableRow(self, table):
-        self.c.execute(f"SELECT * FROM {table} ORDER BY id DESC LIMIT 1;")
+        self.c.execute(f"SELECT * FROM {table} ORDER BY time DESC LIMIT 1;")
         return self.c.fetchall()
     
     def writeRowToTable(self, tablename: str, rowdata: list, columns: list):
@@ -56,8 +70,11 @@ class Database:
         self.writeRowToTable("sensordata", rowdata, self.sensorTableColumns)
 
     def writeGuiTableRow(self, rowdata: list):
-        self.writeRowToTable("GUI", rowdata, self.sensorTableColumns)
-
+        self.writeRowToTable("GUI", rowdata, self.guiTableColumns)
+    
+    def writeMotorControlTableRow(self, rowdata: list):
+        self.writeRowToTable("motorcontrol", rowdata, self.motorControlTableColumns)
+        
     def deleteDatabase(self):
         self.conn.close()
         if os.path.exists(self.databasePath):
