@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 class Database:
-    def __init__(self, databasePath: str, sensorTableColumns: list=[], guiTableColumns: list=[], motorControlTableColumns: list=[]) -> None:
+    def __init__(self, databasePath: str, sensorTableColumns: list[str]=[], guiTableColumns: list[str]=[], motorControlTableColumns: list[str]=[]) -> None:
         self.databasePath = databasePath
         # The desired columns of the Database are given as arguments and stored in class members
         self.sensorTableColumns = sensorTableColumns
