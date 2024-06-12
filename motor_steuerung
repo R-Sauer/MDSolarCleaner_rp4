@@ -26,8 +26,8 @@ class StepMotor:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(motorStepPin, GPIO.OUT)
         GPIO.setup(motorDirPin, GPIO.OUT)
-        GPIO.setup(endStopPin1, GPIO.IN)
-        GPIO.setup(endStopPin2, GPIO.IN)
+        GPIO.setup(endStopPin1, GPIO.IN, pull_up_down=GPIO.PUD_UP)  #Man benutzt PULLUP Widerstand um einen Kabel zu sparen
+        GPIO.setup(endStopPin2, GPIO.IN, pull_up_down=GPIO.PUD_UP)  #damit braucht man nur einen Swicht mit GND
           
     def makeSteps(self, stepsNr, dir):
        #Setze Richtung
