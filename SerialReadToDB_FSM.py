@@ -14,7 +14,13 @@ class SerialFSMCommand(Enum):
     Start = 0
     Stop = 1
 
-def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_baud: int, commandPipe: PipeConnection):
+def startSerialReceive(commandPipe: PipeConnection) -> None:
+    commandPipe.send(SerialFSMCommand.Start)
+
+def stopSerialReceive(commandPipe: PipeConnection) -> None:
+    commandPipe.send(SerialFSMCommand.Stop)
+
+def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_baud: int, commandPipe: PipeConnection) -> None:
     try:
         db = solarCleanerDB.Database(databasePath, sensorTableColumns)
         db.initSensorTable()
@@ -60,8 +66,9 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
 
 
 if __name__ == '__main__':
-    databasePath = './test.db'
+    databasePath = './test_SerialReceive.db'
     SENSOR_FIELDS = ["brush1_rpm", "brush2_rpm", "current_mA"]
     serial_baud = 115200
     conn1, conn2 = multiprocessing.Pipe()
-    serialReceiveFSM(databasePath, SENSOR_FIELDS, serial_baud, conn1)
+    startSerialReceive(conn1)
+    serialReceiveFSM(databasePath, SENSOR_FIELDS, serial_baud, conn2)
