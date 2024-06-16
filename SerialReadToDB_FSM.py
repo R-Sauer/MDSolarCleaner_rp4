@@ -4,11 +4,12 @@ import serial
 import solarCleanerDB
 import platform
 from enum import Enum
+import time
 
 class SerialFSMState(Enum):
     Standby = 0
     ReadFirstLine = 1
-    ReadContinous = 2
+    ReadContinuous = 2
 
 class SerialFSMCommand(Enum):
     Start = 0
@@ -27,36 +28,41 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
         
         try:    
             if platform.system() == 'Linux':
-                ser = serial.Serial('/dev/ttyACM0', serial_baud, dsrdtr=True)  # Raspberry Pi
+                ser = serial.Serial('/dev/ttyACM0', serial_baud, dsrdtr=True, timeout=1)  # Raspberry Pi
             else:
-                ser = serial.Serial('COM7', serial_baud, timeout = 1, dsrdtr=True)  # Windows PC
-        except serial.serialutil.SerialException:
-            print("Serial connection failed. Check USB connection to Arduino, and COM port access")
+                ser = serial.Serial('COM7', serial_baud, dsrdtr=True, timeout=1)  # Windows PC
+        except serial.serialutil.SerialException as e:
+            print(f"Serial connection failed. Check USB connection to Arduino, and COM port access: {e}")
             return
         
+        # Sleep for 0.01 sec to give serial interface time to initialize
+        time.sleep(0.01)
+        
+
+        encoding = 'ascii'
         state = SerialFSMState.Standby
         stateNext = SerialFSMState.Standby
         while(True):
             match state:
                 case SerialFSMState.Standby:
-                    # Get FSM control Signal from Pipe
+                    # Get FSM control signal from pipe
                     if commandPipe.poll():
                         if commandPipe.recv() == SerialFSMCommand.Start:
                             stateNext = SerialFSMState.ReadFirstLine
                 case SerialFSMState.ReadFirstLine:
-                    # Clear Input Buffer to avoid errors
+                    # Clear input buffer to avoid errors
                     ser.reset_input_buffer()
-                    # Make the buffer start at the beginning of a data frame
+                    # Discard the first line to make the buffer start at the beginning of a data frame
                     ser.readline()
-                    stateNext = SerialFSMState.ReadContinous
-                case SerialFSMState.ReadContinous:
+                    stateNext = SerialFSMState.ReadContinuous
+                case SerialFSMState.ReadContinuous:
+                    if ser.in_waiting:
+                        dataStrList = ser.readline().decode(encoding).rstrip().split(";")
+                        dataFloatList = [float(val) for val in dataStrList]
+                        db.writeSensorTableRow(dataFloatList)
                     if commandPipe.poll():
                         if commandPipe.recv() == SerialFSMCommand.Stop:
                             stateNext = SerialFSMState.Standby
-                    if ser.in_waiting:
-                        dataStrList = ser.readline().decode().rstrip().split(";")
-                        dataFloatList = [float(val) for val in dataStrList]
-                        db.writeSensorTableRow(dataFloatList)
             state = stateNext
     finally:
         if 'db' in locals():
