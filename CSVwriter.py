@@ -1,10 +1,9 @@
 import solarCleanerDB
 import datetime
 import csv
-import os
 
 
-def writeCSV(databasePath: str):
+def writeCSV(databasePath: str, tableColumns: list[str]):
     db = solarCleanerDB.Database(databasePath)
     try:
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -13,6 +12,7 @@ def writeCSV(databasePath: str):
         if data is not []:
             with open(path, "w", newline = "") as f:
                 writer = csv.writer(f)
+                writer.writerow(["System Time"] + tableColumns)
                 for row in data:
                     writer.writerow(row)
         else:
@@ -23,4 +23,5 @@ def writeCSV(databasePath: str):
 if __name__ == "__main__":
     databasePath = "./test_mp.db"
     tablename = "sensordata"
-    writeCSV(databasePath, tablename)
+    SENSOR_FIELDS = ["brush1_rpm", "brush2_rpm", "current_mA"]
+    writeCSV(databasePath, SENSOR_FIELDS)
