@@ -1,5 +1,5 @@
-from multiprocessing.connection import PipeConnection
 import multiprocessing
+from multiprocessing.connection import Connection
 import serial
 import solarCleanerDB
 import platform
@@ -15,13 +15,13 @@ class SerialFSMCommand(Enum):
     Start = 0
     Stop = 1
 
-def startSerialReceive(commandPipe: PipeConnection) -> None:
+def startSerialReceive(commandPipe: Connection) -> None:
     commandPipe.send(SerialFSMCommand.Start)
 
-def stopSerialReceive(commandPipe: PipeConnection) -> None:
+def stopSerialReceive(commandPipe: Connection) -> None:
     commandPipe.send(SerialFSMCommand.Stop)
 
-def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_baud: int, commandPipe: PipeConnection) -> None:
+def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_baud: int, commandPipe: Connection, printToConsole: bool=False) -> None:
     try:
         db = solarCleanerDB.Database(databasePath, sensorTableColumns)
         db.initSensorTable()
@@ -35,8 +35,8 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
             print(f"Serial connection failed. Check USB connection to Arduino, and COM port access: {e}")
             return
         
-        # Sleep for 0.01 sec to give serial interface time to initialize
-        time.sleep(0.01)
+        # Sleep for 0.2 sec to give serial interface time to initialize
+        time.sleep(0.2)
         
 
         encoding = 'ascii'
@@ -58,8 +58,10 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
                 case SerialFSMState.ReadContinuous:
                     if ser.in_waiting:
                         dataStrList = ser.readline().decode(encoding).rstrip().split(";")
-                        dataFloatList = [float(val) for val in dataStrList]
+                        dataFloatList = [float(val) for val in dataStrList if val]
                         db.writeSensorTableRow(dataFloatList)
+                    if printToConsole:
+                        print(dataFloatList)
                     if commandPipe.poll():
                         if commandPipe.recv() == SerialFSMCommand.Stop:
                             stateNext = SerialFSMState.Standby

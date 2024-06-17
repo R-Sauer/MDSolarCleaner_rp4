@@ -1,17 +1,24 @@
 import serial
 import solarCleanerDB
 import platform
+import time
 
 def serialReceive(databasePath, sensorTableColumns, serial_baud):
     try:    
-        if platform.system() == 'Linux':
-            ser = serial.Serial('/dev/ttyACM0', serial_baud, dsrdtr=True)  # Raspberry Pi
-        else:
-            ser = serial.Serial('COM7', serial_baud, timeout = 1, dsrdtr=True)  # Windows PC
+        try:    
+            if platform.system() == 'Linux':
+                ser = serial.Serial('/dev/ttyACM0', serial_baud, dsrdtr=True, timeout=1)  # Raspberry Pi
+            else:
+                ser = serial.Serial('COM7', serial_baud, dsrdtr=True, timeout=1)  # Windows PC
+        except serial.serialutil.SerialException as e:
+            print(f"Serial connection failed. Check USB connection to Arduino, and COM port access: {e}")
+            return
+        
+        # Sleep for 0.01 sec to give serial interface time to initialize
+        time.sleep(0.01)
         
         db = solarCleanerDB.Database(databasePath, sensorTableColumns)
         db.initSensorTable()
-
         firstLine = True
         while(True):
                 if ser.in_waiting:
@@ -19,7 +26,7 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
                         ser.reset_input_buffer()
                         ser.readline()
                         firstLine = False
-                    dataStrList = ser.readline().decode().rstrip().split(";")
+                    dataStrList = ser.readline().decode(encoding='ascii').rstrip().split(";")
                     dataFloatList = [float(val) for val in dataStrList]
                     db.writeSensorTableRow(dataFloatList)
     finally:
