@@ -13,10 +13,10 @@ except ImportError:
 #Class Motor definieren
 class StepMotor:
     def __init__(self, motorStepPin, motorDirPin, endStopPin1, endStopPin2):
-        self.motorStepPin = motorStepPin        #Pin Nummer des Motors f¸r die Steps ausgaben
-        self.motorDirPin = motorDirPin          #Pin Nummer des Motors f¸r die Richtung 0 => dir_pin=low  1 => dir_pin=high
-        self.endStopPin1 = endStopPin1          #Pin f¸r Endstopschalter1
-        self.endStopPin2 = endStopPin2          #Pin f¸r Endstopschalter2
+        self.motorStepPin = motorStepPin        #Pin Nummer des Motors f√ºr die Steps ausgaben
+        self.motorDirPin = motorDirPin          #Pin Nummer des Motors f√ºr die Richtung 0 => dir_pin=low  1 => dir_pin=high
+        self.endStopPin1 = endStopPin1          #Pin f√ºr Endstopschalter1
+        self.endStopPin2 = endStopPin2          #Pin f√ºr Endstopschalter2
         self.stop_requested = Event()           # Event to signal stop
         self.initStepPeriod = 2500              #Dauer eines Schrittes in us -> 1Hz -> 0,14 m/s
         self.stepPeriod = self.initStepPeriod
@@ -35,7 +35,7 @@ class StepMotor:
        #Setze Richtung
        GPIO.output(self.motorDirPin, dir)
        self.stop_requested.clear()
-       #neu Initializierung von currentStepPeriod f¸r Anfahrgeschwindigkeit
+       #neu Initializierung von currentStepPeriod f√ºr Anfahrgeschwindigkeit
        self.currentStepPeriod = self.initStepPeriod  
        #Bewegung des Motors in die angegebene Schritte
        for _ in range (stepsNr):
@@ -53,7 +53,7 @@ class StepMotor:
           #Anfahrgeschwindigkeit anpassen
           if(self.currentStepPeriod > self.stepPeriod):
               self.currentStepPeriod = self.currentStepPeriod - 3
-          #Schritte z‰hlen
+          #Schritte z√§hlen
           if(dir == 0):
              self.totalSteps =+ 1
           if(dir == 1):
@@ -92,17 +92,17 @@ class BrushMotor:
     def __init__(self, pwm_pin):
         self.pwm_pin = pwm_pin
         self.speedInPercent = 0          #kann Werte zwischen -100 und 100 haben. Vorzeichnen bestimmt die Richtung
-        self.dutyCycle = self.speedInPercent*0.168 + 55.6  #Tastenverh‰ltnis kann Werte zwischen 0 und 100 haben
-        self.direction = 0
+        self.dutyCycle = self.speedInPercent*0.168 + 55.6  #Tastenverh√§ltnis kann Werte zwischen 0 und 100 haben
+        self.direction = 0 # diese Attribute ist nicht verwendet
         self.is_active = False
         
         # Initialisierung der GPIO-Pins
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pwm_pin, GPIO.OUT)
         
-        # PWM-Objekt f¸r die Geschwindigkeitssteuerung
+        # PWM-Objekt f√ºr die Geschwindigkeitssteuerung
         self.pwm = GPIO.PWM(self.pwm_pin, 1000)  # 100 Hz PWM
-        self.pwm.start(0)  # Start PWM with 0% duty cycle (Tastenverh‰ltnis von 0)
+        self.pwm.start(0)  # Start PWM with 0% duty cycle (Tastenverh√§ltnis von 0)
 
     def setSpeedPercent(self, value):
         # Setze Geschwindigkeit in Procent zwischen -100 und 100
