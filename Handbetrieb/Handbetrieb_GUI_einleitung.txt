@@ -1,0 +1,8 @@
+1. Visual studio code starten
+2.dieser Pfad : /home/solartest/Documents/MDsolarCleaner/MDSolarCleaner_rp4/Handbetrieb/ öffnen
+3. Bevor man main.py laufen lässt muss den Terminal aktuelisiert werden.
+4. mit 'strg + C' (Keyboard Interrupt) Terminal aktulisieren.
+5. Falls es nicht richtigr Pfad ist, folgende Befehl auf Terminal schreiben : cd /home/solartest/Documents/MDsolarCleaner/MDSolarCleaner_rp4/Handbetrieb/
+6. main.py laufen
+7. Jedes mal bevor man erneut main startet muss Terminal aktualisiert werden ('strg + C').
+VIEL ERFOLG!
