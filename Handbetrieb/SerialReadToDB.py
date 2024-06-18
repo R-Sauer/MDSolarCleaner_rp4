@@ -14,8 +14,8 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
             print(f"Serial connection failed. Check USB connection to Arduino, and COM port access: {e}")
             return
         
-        # Sleep for 0.01 sec to give serial interface time to initialize
-        time.sleep(0.01)
+        # Sleep for 0.2 sec to give serial interface time to initialize
+        time.sleep(0.2)
         
         db = solarCleanerDB.Database(databasePath, sensorTableColumns)
         db.initSensorTable()
@@ -30,8 +30,10 @@ def serialReceive(databasePath, sensorTableColumns, serial_baud):
                     dataFloatList = [float(val) for val in dataStrList]
                     db.writeSensorTableRow(dataFloatList)
     finally:
-        db.closeConnection()
-        ser.close()
+        if 'db' in locals():
+            db.closeConnection()
+        if 'ser' in locals():
+            ser.close()
 
 
 if __name__ == '__main__':
