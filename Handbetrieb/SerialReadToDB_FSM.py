@@ -1,3 +1,7 @@
+# author: Raphael Sauer
+# mailto: raphael.sauer@haw-hamburg.de
+# date: 06/2024
+
 import multiprocessing
 from multiprocessing.connection import Connection
 import serial

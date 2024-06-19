@@ -1,6 +1,9 @@
+# author: Raphael Sauer
+# mailto: raphael.sauer@haw-hamburg.de
+# date: 06/2024
+
 import multiprocessing as mp
 from SerialReadToDB_FSM import *
-from SerialReadToDB import serialReceive
 from solarCleanerDB import Database
 import time
 from Handbetrieb import handbetrieb
