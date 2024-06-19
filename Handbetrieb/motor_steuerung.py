@@ -43,8 +43,8 @@ class StepMotor:
           if self.stop_requested.is_set():
                 break  # Exit the loop if stopping is requested
           #Endstopsauswertung
-          if ((GPIO.input(self.endStopPin1) != GPIO.HIGH) & (dir == 1)) | ((GPIO.input(self.endStopPin2) != GPIO.HIGH) & (dir == 0)):
-             break
+          #if ((GPIO.input(self.endStopPin1) != GPIO.HIGH) & (dir == 1)) | ((GPIO.input(self.endStopPin2) != GPIO.HIGH) & (dir == 0)):
+          #   break
           #Schritte machen
           GPIO.output(self.motorStepPin, GPIO.HIGH)
           time.sleep(self.currentStepPeriod/2000000)           #Die Funktion hat Sekunde als input
@@ -80,7 +80,7 @@ class StepMotor:
        self.stepPeriod = (10000)/(4*frequency)            #Frequenz in Hz und Period in us
     
     def setSpeedInMPS(self, velocity):
-       self.stepPeriod = (10000)/(28*velocity)           #velocity in m/s und Peruid in us
+       self.stepPeriod = (10000)/(28*velocity)           #velocity in m/s und Period in us
     
     def getSteps(self):
         return self.totalSteps

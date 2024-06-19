@@ -74,7 +74,10 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
         zeit.config(text=strftime("%H:%M:%S %p"))
         zeit.after(1000, getTime)  #Nach 1000 Millisekunden (1 Sekunde) wird die Funktion "time" wieder aufgerufen
 
+    ###################################################################################################
     ####################### Schrittmotor Funktionen Beginn ############################################
+    ###################################################################################################
+
 
     # Function for Schrittmotor stop
     def Schrittmotor_stop():
@@ -147,12 +150,16 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
         # Call the inner function to start the movement
         motor_Y_discrete_down()
 
-     ####################### Schrittmotor Funktionen Ende ############################################
+    ##################################################################################################
+    ####################### Schrittmotor Funktionen Ende ############################################
+    ##################################################################################################
             
     #Konzept für Schrittmotor X
     #wenn für X Richtung auch ein Schrittmotor benutzt wird, kann die gleiche Konzepte von Y Richtung genutzt werden.
 
+    ###################################################################
     ######### Bürstenmotoren Funtionen Beginn #########################
+    ###################################################################
 
     # Function to control brushed motor	
     def move_brushmotor(BrushMotor , direction):
@@ -190,8 +197,10 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
     def set_step_motor_speed(speed):
         motorY.setSpeedInMPS(speed)
         print('step motor speed: ', speed)
-        
-     ######### Bürstenmotoren Funtionen Ende ######################### 
+
+    ##################################################################
+    ######### Bürstenmotoren Funtionen Ende ##########################
+    ##################################################################
         
     # Create GUI
     root = tk.Tk() 
@@ -228,7 +237,9 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
     zeit.grid(row=17,column=3,sticky = "NSEW")
     getTime()
 
+    ####################################################
     ########### Schrittmotor Buttons ###################
+    ####################################################
 
     #labels
     lbl_motor_Y = tk.Label(root, text="Schrittmotor Y")
@@ -332,8 +343,10 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
      # Call move_step_motor_Y_up function when the button is pressed
     btn_step_motor_Y_continuous_up.config(command=move_step_motor_Y_continuous_up)
     btn_step_motor_Y_continuous_down.config(command=move_step_motor_Y_continuous_down) 
-
+    
+    ################################################################################
     ##### Schrittmotor in  X Richtung  - gleiche Konzepte von Y Richtung ###########
+    ################################################################################
 
     #folgende Zeile sind nur für Platzierung
     lbl_motor_X = tk.Label(root, text="Schrittmotor X")
@@ -344,7 +357,9 @@ def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPi
             label_X = tk.Label(root, text='X')
             label_X.grid(row=i, column=j)
 
+    ###################################################
     ########### Bürstemotor Buttons ###################
+    ###################################################
 
     # Brush Motor 1
     lbl_brush_motor_1 = tk.Label(root, text="Bürste 1")
