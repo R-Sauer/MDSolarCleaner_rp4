@@ -40,7 +40,7 @@ def toggle_power():
 buttons_disabled = True
 
 
-def handbetrieb(databasePath, sensorColumns, readSerialcommandPipe: Connection):
+def handbetrieb(databasePath: str, sensorColumns: list[str], readSerialcommandPipe: Connection):
 
     # GPIO-Pins für die SchrittMotorsteuerung
     motorY_step_pin = 17 # Step-Pin für Motor Y/1
