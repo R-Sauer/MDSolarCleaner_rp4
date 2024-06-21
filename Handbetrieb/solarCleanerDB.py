@@ -52,6 +52,9 @@ class Database:
         self.c.execute(f"""
                        DROP TABLE {table}
                        """)
+
+    def deleteSensorTable(self):
+        self.deleteTable("sensordata")
     
     def getTable(self, tablename: str):
         self.c.execute(f"""

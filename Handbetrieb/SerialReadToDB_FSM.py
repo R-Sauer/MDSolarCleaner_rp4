@@ -53,6 +53,8 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
                     if commandPipe.poll():
                         if commandPipe.recv() == SerialFSMCommand.Start:
                             stateNext = SerialFSMState.ReadFirstLine
+                            db.deleteSensorTable()
+                            db.initSensorTable()
                 case SerialFSMState.ReadFirstLine:
                     # Clear input buffer to avoid errors
                     ser.reset_input_buffer()
