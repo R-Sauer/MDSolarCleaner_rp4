@@ -40,7 +40,7 @@ def serialReceiveFSM(databasePath: str, sensorTableColumns: list[str], serial_ba
             return
         
         # Sleep for 0.2 sec to give serial interface time to initialize
-        time.sleep(0.2)
+        time.sleep(0.3)
         
 
         encoding = 'ascii'
